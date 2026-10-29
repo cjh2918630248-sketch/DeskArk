@@ -89,8 +89,14 @@ Spine 渲染控件，继承 `QOpenGLWidget`，负责模型加载与 OpenGL 绘�
 
 ## 构建与运行
 
+spin-cpp仓库地址：https://github.com/Chobolabs/spine-cpp
+nlohmann_json仓库地址：https://github.com/azadkuh/nlohmann_json_release
+Ark-Models仓库地址：https://github.com/isHarryh/Ark-Models
+
 ```powershell
 cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_PREFIX_PATH=D:/Development/Qt/6.8.3/mingw_64 -DCMAKE_CXX_COMPILER=D:/Development/mingw64/bin/g++.exe
 cmake --build build
 # 运行 build/DeskArk.exe
 ```
+## 版权声明
+本仓库中所有素材其版权归属 上海鹰角网络有限公司 所有。不得用于商业用途，不得损害版权方的利益。
