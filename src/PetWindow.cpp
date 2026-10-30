@@ -25,9 +25,11 @@
 #endif
 
 PetWindow::PetWindow(QWidget *parent) : QWidget(parent) {
-    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
-    setAttribute(Qt::WA_TranslucentBackground);
-    setAttribute(Qt::WA_NoSystemBackground);
+    setWindowFlags(Qt::FramelessWindowHint | 
+        Qt::WindowStaysOnTopHint | 
+        Qt::Tool); // 不显示任务栏图标
+    setAttribute(Qt::WA_TranslucentBackground); // 透明背景
+    setAttribute(Qt::WA_NoSystemBackground); // 不显示系统背景
 
     spine_ = new SpineWidget(this);
 
@@ -35,11 +37,11 @@ PetWindow::PetWindow(QWidget *parent) : QWidget(parent) {
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(spine_);
 
-    QString baseDir = QCoreApplication::applicationDirPath();
+    QString baseDir = QCoreApplication::applicationDirPath(); // 应用程序目录
     QString atlasPath = baseDir + "/models/4231_clemnt/build_char_4231_clemnt.atlas";
     QString skelPath = baseDir + "/models/4231_clemnt/build_char_4231_clemnt.skel";
 
-    if (!QFileInfo::exists(atlasPath) || !QFileInfo::exists(skelPath)) {
+    if (!QFileInfo::exists(atlasPath) || !QFileInfo::exists(skelPath)) { 
         atlasPath = QDir::currentPath() + "/models/4231_clemnt/build_char_4231_clemnt.atlas";
         skelPath = QDir::currentPath() + "/models/4231_clemnt/build_char_4231_clemnt.skel";
     }
@@ -48,7 +50,15 @@ PetWindow::PetWindow(QWidget *parent) : QWidget(parent) {
         qWarning() << "skeleton load failed";
     }
 
-    resize(320, 320);
+    // 窗口大小紧贴角色可见区域，避免多余透明留白
+    QSize charSize = spine_->characterSize();
+    if (charSize.width() > 0 && charSize.height() > 0) {
+        resize(charSize);
+        qDebug() << "characterSize = " << charSize;
+    } else {
+        resize(160, 160);  // 兜底：拿不到尺寸时用默认值
+        qDebug() << "characterSize = " << charSize;
+    }
     spine_->fitToView();
 
     loadRoles();
@@ -57,26 +67,26 @@ PetWindow::PetWindow(QWidget *parent) : QWidget(parent) {
 
 void PetWindow::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
-        dragging_ = true;
+        dragging_ = true; // 开始拖拽
         stopMove();  // 拖拽时暂停自动移动，避免与定时器抢位置
-        press_pos_ = event->globalPosition().toPoint();
-        drag_offset_ = press_pos_ - frameGeometry().topLeft();
+        press_pos_ = event->globalPosition().toPoint(); // 记录按下时坐标
+        drag_offset_ = press_pos_ - frameGeometry().topLeft(); // 计算拖拽偏移量
         event->accept();
     }
 }
 
 void PetWindow::mouseMoveEvent(QMouseEvent *event) {
-    if (dragging_ && (event->buttons() & Qt::LeftButton)) {
-        move(event->globalPosition().toPoint() - drag_offset_);
+    if (dragging_ && (event->buttons() & Qt::LeftButton)) { // 拖拽时(左键按住)
+        move(event->globalPosition().toPoint() - drag_offset_); // 更新窗口左上角坐标
         event->accept();
     }
 }
 
 void PetWindow::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton && dragging_) {
-        dragging_ = false;
-        if ((event->globalPosition().toPoint() - press_pos_).manhattanLength() < 8) {
-            cycleAnimation();
+        dragging_ = false; // 结束拖拽
+        if ((event->globalPosition().toPoint() - press_pos_).manhattanLength() < 8) { // 点击事件: 曼哈顿距离小于8像素
+            cycleAnimation();  // 切换动画
         }
         event->accept();
     }

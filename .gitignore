@@ -4,7 +4,12 @@
 
 # 构建产物
 build/
+release/
+dist/
 
+# 发布包
+DeskArk-win64.zip
+*.zip
 # 第三方库（保留目录本身，忽略其中全部子内容）
 3rd_party/*
 !3rd_party/.gitkeep
