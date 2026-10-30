@@ -47,6 +47,8 @@ public:
     void setAutoReturnToRelax(bool enabled);
     // 冻结窗口形状更新：移动期间跳过 grabFramebuffer，避免周期性卡顿
     void setMaskFrozen(bool frozen);
+    // 返回角色当前姿态的可见包围盒尺寸（逻辑像素），用于紧贴角色设置窗口大小
+    QSize characterSize() const;
 
 protected:
     void initializeGL() override;

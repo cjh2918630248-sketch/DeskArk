@@ -58,7 +58,6 @@ void SpineWidget::QtSpineTextureLoader::unload(void *texture) {
 SpineWidget::SpineWidget(QWidget *parent) : QOpenGLWidget(parent) {
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_TransparentForMouseEvents);
-    setMinimumSize(200, 200);
 
     // 以 60 FPS 上限驱动重绘，避免 paintGL 自旋空转
     frame_timer_ = new QTimer(this);
@@ -314,7 +313,6 @@ void SpineWidget::paintGL() {
     if (!skeleton_ || !program_ || !program_->isLinked()) {
         return;
     }
-
     // 帧间隔
     qint64 now = clock_.elapsed();
     float dt = static_cast<float>(now - last_frame_time_) / 1000.0f;
@@ -337,7 +335,7 @@ void SpineWidget::paintGL() {
     float vpH = static_cast<float>(height() * dpr);
     glViewport(0, 0, static_cast<GLsizei>(vpW), static_cast<GLsizei>(vpH));
     glClear(GL_COLOR_BUFFER_BIT);
-
+    qDebug() << "窗口:" << width() << "x" << height() << "hitRegion外接矩形:" << region_.boundingRect();
     anim_state_->update(dt);
     anim_state_->apply(*skeleton_);
     skeleton_->updateWorldTransform();
@@ -561,4 +559,23 @@ GLuint SpineWidget::createGlTexture(const QImage &image) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, rgba.width(), rgba.height(), 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, rgba.constBits());
     return tex;
+}
+
+QSize SpineWidget::characterSize() const {
+    if (!skeleton_) {
+        return QSize();
+    }
+    spine::Vector<float> buffer;
+    float bx = 0, by = 0, bw = 0, bh = 0;
+    skeleton_->getBounds(bx, by, bw, bh, buffer);
+    if (bw <= 0.0f || bh <= 0.0f) {
+        return QSize();
+    }
+    // getBounds 返回物理像素（fitToView 里用 vpW = width()*dpr 与之比较可证），
+    // 而 QWidget::resize 用逻辑像素，所以除以 DPR
+    qreal dpr = devicePixelRatioF();
+    if (dpr <= 0.0) {
+        dpr = 1.0;
+    }
+    return QSize(qRound(bw / dpr), qRound(bh / dpr));
 }
