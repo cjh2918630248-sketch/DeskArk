@@ -1,0 +1,21 @@
+# IDE / 编辑器
+.qtcreator/
+.screenshots/
+
+# 构建产物
+build/
+release/
+dist/
+
+# 发布包
+DeskArkLite-win64.zip
+*.zip
+*.7z
+# 第三方库（保留目录本身，忽略其中全部子内容）
+3rd_party/*
+!3rd_party/.gitkeep
+
+models/*
+!models/.gitkeep
+spine_output/*
+!spine_output/.gitkeep
